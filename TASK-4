@@ -1,0 +1,79 @@
+"""
+Sales Prediction with Machine Learning (Beginner Version)
+---------------------------------------------------------
+Imagine you are running a shop and want to know how much you might sell
+based on how much money you spend on ads, how many people you reach,
+and how good the platform is (like Instagram or YouTube).
+This simple program shows how we can use Python + Machine Learning
+to make those predictions.
+"""
+
+# Step 1: Import the tools we need
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error, r2_score
+
+print("Libraries are ready!")
+
+# Step 2: Make some pretend (synthetic) data
+# Think of this as "practice data" for learning
+np.random.seed(42)  # makes results repeatable
+
+print("Creating a simple dataset...")
+
+# Features (inputs)
+ad_spend = np.random.randint(1000, 5000, 50)         # money spent on ads
+audience_size = np.random.randint(10000, 100000, 50) # number of people reached
+platform_score = np.random.randint(1, 10, 50)        # how good the platform is (1–10)
+
+# Target (output we want to predict)
+sales = (0.5 * ad_spend) + (0.05 * audience_size) + (200 * platform_score) + np.random.randint(1000, 5000, 50)
+
+# Put everything into a table (DataFrame)
+data = pd.DataFrame({
+    'ad_spend': ad_spend,
+    'audience_size': audience_size,
+    'platform_score': platform_score,
+    'sales': sales
+})
+
+print("Here’s what the data looks like:\n")
+print(data.head())  # show first 5 rows
+
+# Step 3: Split data into training and testing sets
+print("\nSplitting data into training (to learn) and testing (to check)...")
+X = data[['ad_spend', 'audience_size', 'platform_score']]  # inputs
+y = data['sales']                                         # output
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Step 4: Train the model
+print("Training the Random Forest model (think of it as a smart calculator)...")
+model = RandomForestRegressor(n_estimators=50, random_state=42)
+model.fit(X_train, y_train)
+
+# Step 5: Make predictions
+print("Predicting sales for test data...")
+y_pred = model.predict(X_test)
+
+# Step 6: Check how good the model is
+rmse = mean_squared_error(y_test, y_pred, squared=False)
+r2 = r2_score(y_test, y_pred)
+
+print(f"\nModel finished!\n   RMSE (error): {rmse:.2f}\n   R² Score (accuracy): {r2:.2f}")
+
+# Step 7: Visualize results
+print("Drawing a chart to compare actual vs predicted sales...")
+plt.figure(figsize=(7,5))
+plt.scatter(y_test, y_pred, color='blue', alpha=0.7, label="Predicted Sales")
+plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--', label="Perfect Prediction")
+plt.xlabel("Actual Sales")
+plt.ylabel("Predicted Sales")
+plt.title("Actual vs Predicted Sales (Beginner Demo)")
+plt.legend()
+plt.show()
+
+print("Done! You just built your first sales prediction model.")
