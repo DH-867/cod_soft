@@ -1,0 +1,85 @@
+"""
+Credit Card Fraud Detection 
+------------------------------------------------------
+This program teaches you how to use machine learning
+to detect fraudulent credit card transactions.
+We will go step by step, just like in a classroom exercise.
+"""
+
+# Step 1: Import the necessary libraries
+import pandas as pd
+import numpy as np
+
+# Machine learning tools
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, confusion_matrix
+
+# Tool to fix imbalance in fraud vs genuine transactions
+from imblearn.over_sampling import SMOTE
+
+print("Step 1 complete: Libraries are ready!")
+
+# Step 2: Load the dataset
+# Note: Replace 'creditcard.csv' with the path to your dataset file
+data = pd.read_csv("creditcard.csv")
+
+print("\nStep 2 complete: Dataset loaded.")
+print("Class distribution before balancing (0 = genuine, 1 = fraud):")
+print(data['Class'].value_counts())
+
+# Step 3: Separate features (inputs) and target (output)
+X = data.drop('Class', axis=1)  # transaction details
+y = data['Class']               # fraud label
+
+print("\nStep 3 complete: Features and target separated.")
+
+# Step 4: Normalize features
+# This makes sure all numbers are on a similar scale
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+print("Step 4 complete: Features normalized.")
+
+# Step 5: Handle class imbalance
+# Fraud cases are rare, so we use SMOTE to create synthetic fraud samples
+smote = SMOTE(random_state=42)
+X_resampled, y_resampled = smote.fit_resample(X_scaled, y)
+
+print("\nStep 5 complete: Class distribution after balancing:")
+print(pd.Series(y_resampled).value_counts())
+
+# Step 6: Split into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(
+    X_resampled, y_resampled, test_size=0.2, random_state=42
+)
+
+print("Step 6 complete: Data split into training and testing sets.")
+
+# Step 7: Train Logistic Regression
+print("\nStep 7: Training Logistic Regression model...")
+log_model = LogisticRegression(max_iter=1000, random_state=42)
+log_model.fit(X_train, y_train)
+y_pred_log = log_model.predict(X_test)
+
+# Step 8: Train Random Forest
+print("Step 8: Training Random Forest model...")
+rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
+rf_model.fit(X_train, y_train)
+y_pred_rf = rf_model.predict(X_test)
+
+# Step 9: Evaluate both models
+print("\nStep 9: Evaluating models...")
+
+print("\nLogistic Regression Performance:")
+print(classification_report(y_test, y_pred_log))
+
+print("\nRandom Forest Performance:")
+print(classification_report(y_test, y_pred_rf))
+
+print("\nConfusion Matrix (Random Forest):")
+print(confusion_matrix(y_test, y_pred_rf))
+
+print("\nCongratulations! You just built and tested your first fraud detection models.")
